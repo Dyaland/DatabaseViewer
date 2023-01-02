@@ -159,6 +159,10 @@ class SupportFunctions:
             print("""Created "SQL_sample.db" """)
         except Exception as e:
             print(e)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
 
 
     def create_test_db(self):
@@ -178,30 +182,49 @@ class SupportFunctions:
             print("""Created "SQL_test.db" """)
         except Exception as e:
             print(e)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
 
     @staticmethod
     def fetch_tablenames(filepath):
         """Fetches a list of all table names from a file"""
-        with sqlite3.connect(filepath) as connection:
-            cursor = connection.execute("""SELECT NAME FROM sqlite_master WHERE type="table";""")
+        try:
+            with sqlite3.connect(filepath) as connection:
+                cursor = connection.execute("""SELECT NAME FROM sqlite_master WHERE type="table";""")
 
-            return [table[0] for table in cursor.fetchall()]
+                return [table[0] for table in cursor.fetchall()]
+        except Exception as e:
+            print(e)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
 
     @staticmethod
     def open_table(filepath, table_name):
         """Unpack data and return list of headers and list of lists of data"""
-        with sqlite3.connect(filepath) as connection:
+        
+        try:
+            with sqlite3.connect(filepath) as connection:
 
-            # Get header names
-            connection.row_factory = sqlite3.Row
-            cursor = connection.execute(f"""SELECT rowid, * FROM "{table_name}" """)
-            headers = cursor.fetchone().keys()  # List of headers
-            headers[0] = "ID"  # Rename "rowid" as "Id"
+                # Get header names
+                connection.row_factory = sqlite3.Row
+                cursor = connection.execute(f"""SELECT rowid, * FROM "{table_name}" """)
+                headers = cursor.fetchone().keys()  # List of headers
+                headers[0] = "ID"  # Rename "rowid" as "Id"
 
-            # Get rows of data. (RE-SELECT so that first data-row isn't lost)
-            cursor.execute(f"""SELECT rowid, * FROM "{table_name}" ORDER BY ROWID""")
-            data_rows = [[i for i in row] for row in cursor.fetchall()]
-        return headers, data_rows
+                # Get rows of data. (RE-SELECT so that first data-row isn't lost)
+                cursor.execute(f"""SELECT rowid, * FROM "{table_name}" ORDER BY ROWID""")
+                data_rows = [[i for i in row] for row in cursor.fetchall()]
+            return headers, data_rows
+        except Exception as e:
+            print(e)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
 
     @staticmethod
     def output_formatted(headers, data_rows):
@@ -232,34 +255,55 @@ class SupportFunctions:
     @staticmethod
     def write_row(filepath, table_name, data_dict):
         """Writes input data to table"""
-        with sqlite3.connect(filepath) as connection:
-            cursor = connection.cursor()
+        try:
+            with sqlite3.connect(filepath) as connection:
+                cursor = connection.cursor()
 
-            header_string = ", ".join([f'"{keys}"' for keys in data_dict])
-            data_row = tuple([data_dict[values] for values in data_dict])
+                header_string = ", ".join([f'"{keys}"' for keys in data_dict])
+                data_row = tuple([data_dict[values] for values in data_dict])
 
-            cursor.execute(f"""INSERT INTO "{table_name}" ({header_string}) VALUES {data_row}""")
-            connection.commit()
+                cursor.execute(f"""INSERT INTO "{table_name}" ({header_string}) VALUES {data_row}""")
+                connection.commit()
+        except Exception as e:
+            print(e)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
 
     @staticmethod
     def delete_row(filepath, table_name, row_id):
-        with sqlite3.connect(filepath) as connection:
-            cursor = connection.cursor()
+        try:
+            with sqlite3.connect(filepath) as connection:
+                cursor = connection.cursor()
 
-            cursor.execute(f"""DELETE FROM "{table_name}" WHERE rowid={row_id}""")
+                cursor.execute(f"""DELETE FROM "{table_name}" WHERE rowid={row_id}""")
+        except Exception as e:
+            print(e)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
 
     @staticmethod
     def edit_row(filepath, table_name, row_id, data_dict):
-        with sqlite3.connect(filepath) as connection:
-            cursor = connection.cursor()
+        try:
+            with sqlite3.connect(filepath) as connection:
+                cursor = connection.cursor()
 
-            cursor.execute(f"""DELETE FROM "{table_name}" WHERE rowid={row_id}""")
+                cursor.execute(f"""DELETE FROM "{table_name}" WHERE rowid={row_id}""")
 
-            header_string = ", ".join([f'"{keys}"' for keys in data_dict])
-            data_row = tuple([data_dict[item] for item in data_dict])
+                header_string = ", ".join([f'"{keys}"' for keys in data_dict])
+                data_row = tuple([data_dict[item] for item in data_dict])
 
-            cursor.execute(f"""INSERT INTO "{table_name}" ({header_string}) VALUES {data_row}""")
-            connection.commit()
+                cursor.execute(f"""INSERT INTO "{table_name}" ({header_string}) VALUES {data_row}""")
+                connection.commit()
+        except Exception as e:
+            print(e)
+        finally:
+            if connection:
+                cursor.close()
+                connection.close()
 
     @staticmethod
     def rip_txt(filepath):
