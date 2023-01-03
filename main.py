@@ -58,30 +58,30 @@ class DataFrame(tk.Frame):
         self.table_name, self.headers, self.data, self.form_width = table_name, headers, data, [0]
 
         # Layout: Data Sorter Frame widgets; LABEL, SORTER DROPDOWN
-        self.sorter_frame = tk.Frame(self, bd=1, relief="raised")
-        self.sorter_head_var = tk.StringVar(self.sorter_frame)
-        self.sorter_head_var.set(f"{self.table_name}, Sort by:")
-        self.sorter_head = tk.Label(self.sorter_frame, textvariable=self.sorter_head_var)
-        self.sort_drop_choice = tk.StringVar(self.sorter_frame, self.headers[sort_i])
+        sorter_frame = tk.Frame(self, bd=1, relief="raised")
+        sorter_head_var = tk.StringVar(sorter_frame)
+        sorter_head_var.set(f"{self.table_name}, Sort by:")
+        sorter_head = tk.Label(sorter_frame, textvariable=sorter_head_var)
+        self.sort_drop_choice = tk.StringVar(sorter_frame, self.headers[sort_i])
         self.sort_drop_choice.trace("w", self.sorter_select)
-        self.sort_dropdown = tk.OptionMenu(self.sorter_frame, self.sort_drop_choice, *self.headers)
+        sort_dropdown = tk.OptionMenu(sorter_frame, self.sort_drop_choice, *self.headers)
 
-        self.sorter_frame.grid(row=0, column=0, sticky="nwe")
-        self.sorter_head.pack(side="left", padx=5, anchor="nw")
-        self.sort_dropdown.pack(side="left", anchor="nw")
+        sorter_frame.grid(row=0, column=0, sticky="nwe")
+        sorter_head.pack(side="left", padx=5, anchor="nw")
+        sort_dropdown.pack(side="left", anchor="nw")
 
         # Layout: Data widgets; TABLE HEADERS, TABLE DATA ROWS, SCROLLBARS
         self.data_headers = tk.Text(self, height=1, wrap="none", bd=1, relief="raised")
         self.data_text = tk.Text(self, wrap="none", bd=1, relief="raised")
         self.data_headers.grid(row=1, column=0, sticky="nwe")
         self.data_text.grid(row=2, column=0, sticky="nwe")
-        self.data_scroll_y = AutoScrollbar(self, width=6, command=self.data_text.yview, orient='vertical')
-        self.data_scroll_x = AutoScrollbar(self, width=6, command=self.dual_scroll, orient='horizontal')
-        self.data_scroll_y.grid(row=1, rowspan=2, column=1, sticky='nsew')
-        self.data_scroll_x.grid(row=3, column=0, sticky='nsew')
-        self.data_headers['xscrollcommand'] = self.data_scroll_x.set
-        self.data_text['xscrollcommand'] = self.data_scroll_x.set
-        self.data_text['yscrollcommand'] = self.data_scroll_y.set
+        data_scroll_y = AutoScrollbar(self, width=6, command=self.data_text.yview, orient='vertical')
+        data_scroll_x = AutoScrollbar(self, width=6, command=self.dual_scroll, orient='horizontal')
+        data_scroll_y.grid(row=1, rowspan=2, column=1, sticky='nsew')
+        data_scroll_x.grid(row=3, column=0, sticky='nsew')
+        self.data_headers['xscrollcommand'] = data_scroll_x.set
+        self.data_text['xscrollcommand'] = data_scroll_x.set
+        self.data_text['yscrollcommand'] = data_scroll_y.set
 
         self.sort_and_display(sort_i)
 
@@ -179,7 +179,7 @@ class Main(tk.Tk):
         self.screen = tk.Frame(self)
         self.screen.pack(fill="both", padx=5, pady=5, expand=True)
 
-        # Layout: Screen Frame
+        # Layout: Screen Frame widgets
         self.side_frame = tk.Frame(self.screen, bd=4, relief="ridge")
         self.side_frame.pack(side="left", fill="y", anchor="nw")
         self.top_frame = tk.Frame(self.screen, bd=4, relief="ridge")
@@ -200,9 +200,9 @@ class Main(tk.Tk):
         self.data_canvas.bind("<Configure>",
                               lambda e: self.data_canvas.configure(scrollregion=self.data_canvas.bbox("all")))
 
-        # Layout: Side Frame MENU BUTTONS
-        self.open_button = self.obj.PressReleaseButton(self.side_frame, "Open file").create()
-        self.open_button.pack(padx=5, pady=10)
+        # Layout: Left side Frame MENU BUTTONS
+        open_button = self.obj.PressReleaseButton(self.side_frame, "Open file").create()
+        open_button.pack(padx=5, pady=10)
         self.read_button = self.obj.DisabledButton(self.side_frame, "Read only").create()
         self.read_button.pack(pady=5, ipady=5)
         self.write_button = self.obj.DisabledButton(self.side_frame, "Write").create()
@@ -213,10 +213,10 @@ class Main(tk.Tk):
         self.edit_button.pack(pady=5, ipady=5)
         self.search_button = self.obj.DisabledButton(self.side_frame, "Search").create()
         self.search_button.pack(pady=5, ipady=5)
-        self.quit_button = self.obj.PressReleaseButton(self.side_frame, "Quit").create()
-        self.quit_button.pack(pady=10)
+        quit_button = self.obj.PressReleaseButton(self.side_frame, "Quit").create()
+        quit_button.pack(pady=10)
 
-        # Layout: Top Frame children
+        # Layout: top_frame children
         # Ops Frame 1
         self.ops_frame1 = tk.Frame(self.top_frame)
         self.ops_frame1.pack(fill="x")
@@ -264,9 +264,9 @@ class Main(tk.Tk):
         self.execute_button.pack()
 
         # Initial click-bindings
-        self.open_button.bind("<ButtonRelease-1>", self.click_open, add="+")
-        self.quit_button.bind("<Button-1>", self.bf.click_down)
-        self.quit_button.bind("<ButtonRelease-1>", self.quit_click)
+        open_button.bind("<ButtonRelease-1>", self.click_open, add="+")
+        quit_button.bind("<Button-1>", self.bf.click_down)
+        quit_button.bind("<ButtonRelease-1>", self.quit_click)
 
     # Program operations
     def click_open(self, _):
