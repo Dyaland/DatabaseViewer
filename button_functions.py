@@ -9,10 +9,12 @@ class ButtonFunctions:
         self.unselected = {"bg": "light gray", "relief": "raised"}
 
     def on_enter(self, _):
+        """Enter mouse hover state"""
         if _.widget["relief"] != tk.SUNKEN:
             _.widget.config(bg="#e8e8e8")  # Lighter gray
 
     def on_leave(self, _):
+        """Leave mouse hover state"""
         if _.widget["relief"] != tk.SUNKEN:
             _.widget.config(bg="light gray")
 

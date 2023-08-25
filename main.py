@@ -186,7 +186,6 @@ class Main(tk.Tk):
         self.table_i = self.tables_names.index(self.tables_drop_var.get())  # Get table's index in tables_names list
         self.shared_states.set_sort(0)  # Set sorting to default.
         self.headers, self.data = self.sql.open_table(self.f_path, self.tables_names[self.table_i])  # Fetch data
-        print(self.headers)
         self.read_click(_)
 
     def _operation_reset(self):
@@ -438,9 +437,8 @@ class Main(tk.Tk):
         """Updates Data Main's scroll region after making multiple tables search"""
         self.data_canvas.configure(scrollregion=self.data_canvas.bbox("all"))
 
-    @staticmethod
-    def quit_click(_):
-        screen.destroy()
+    def quit_click(self, _):
+        self.destroy()
 
 
 if __name__ == '__main__':

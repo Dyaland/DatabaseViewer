@@ -30,6 +30,7 @@ class DataFrame(tk.Frame):
         except IndexError:
             self.shared_states.set_sort(0)
             self.sort_drop_choice = tk.StringVar(sorter_frame, self.headers[0])
+
         self.sort_drop_choice.trace("w", self.sorter_select)
         sort_dropdown = tk.OptionMenu(sorter_frame, self.sort_drop_choice, *self.headers)
 

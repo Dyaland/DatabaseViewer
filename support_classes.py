@@ -18,7 +18,7 @@ class AutoScrollbar(tk.Scrollbar):
 
 
 class SharedStates:
-    """Keeps track of sorting preferences between instance deletions and creations."""
+    """Keeps track of preferences between instances."""
     
     def __init__(self):
         self.sort_i = 0  # Sorting selection by column index.
