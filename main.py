@@ -1,14 +1,3 @@
-"""
-Programmering 2 redovisningsprojekt, uppdaterad
-
-OBS! På äppeldatorer, ändra typsnittsstorlek (rad 148) från 11 till 14.
-
-Kör filen sql_functions.py separat för att skapa två exempel-filer med tabeller.
-
-/Johannes
-"""
-
-
 import sqlite3
 import tkinter as tk
 from tkinter import font  # For setting font globally
@@ -17,121 +6,8 @@ from os.path import basename  # Display filename without file-path
 
 import sql_functions
 import button_functions
-
-
-class DataRow:
-    """Class for storing a set of headers and data"""
-    def __init__(self, headers, data):
-        self.data_dict = {headers[i]: data[i] for i in range(len(headers))}
-
-    def compile_data(self):
-        return self.data_dict
-
-
-class AutoScrollbar(tk.Scrollbar):
-    """Scrollbar that appears only when its area is scrollable"""
-    
-    def set(self, lo, hi):
-        if float(lo) <= 0.0 and float(hi) >= 1.0:
-            self.pack_forget()
-            self.grid_forget()
-        else:
-            try:
-                self.grid()
-            except Exception as e:  # Defaults to grid if pack doesn't work
-                self.pack(side="right", fill="y")
-
-        tk.Scrollbar.set(self, lo, hi)
-
-
-class DataFrame(tk.Frame):
-    """Class containing data table display"""
-    def __init__(self, master, table_name, headers, data, sort_i):
-        super().__init__(master)
-
-        # Imports
-        self.sql = sql_functions.SupportFunctions  # Import my SQL functions
-        self.obj = button_functions  # Import my buttons and general button functions
-        self.bf = button_functions.ButtonFunctions()  # Import button functions
-
-        # Variables
-        self.table_name, self.headers, self.data, self.form_width = table_name, headers, data, [0]
-
-        # Layout: Data Sorter Frame widgets; LABEL, SORTER DROPDOWN
-        sorter_frame = tk.Frame(self, bd=1, relief="raised")
-        sorter_head_var = tk.StringVar(sorter_frame)
-        sorter_head_var.set(f"{self.table_name}, Sort by:")
-        sorter_head = tk.Label(sorter_frame, textvariable=sorter_head_var)
-        self.sort_drop_choice = tk.StringVar(sorter_frame, self.headers[sort_i])
-        self.sort_drop_choice.trace("w", self.sorter_select)
-        sort_dropdown = tk.OptionMenu(sorter_frame, self.sort_drop_choice, *self.headers)
-
-        sorter_frame.grid(row=0, column=0, sticky="nwe")
-        sorter_head.pack(side="left", padx=5, anchor="nw")
-        sort_dropdown.pack(side="left", anchor="nw")
-
-        # Layout: Data widgets; TABLE HEADERS, TABLE DATA ROWS, SCROLLBARS
-        self.data_headers = tk.Text(self, height=1, wrap="none", bd=1, relief="raised")
-        self.data_text = tk.Text(self, wrap="none", bd=1, relief="raised")
-        self.data_headers.grid(row=1, column=0, sticky="nwe")
-        self.data_text.grid(row=2, column=0, sticky="nwe")
-        data_scroll_y = AutoScrollbar(self, width=6, command=self.data_text.yview, orient='vertical')
-        data_scroll_x = AutoScrollbar(self, width=6, command=self.dual_scroll, orient='horizontal')
-        data_scroll_y.grid(row=1, rowspan=2, column=1, sticky='nsew')
-        data_scroll_x.grid(row=3, column=0, sticky='nsew')
-        self.data_headers['xscrollcommand'] = data_scroll_x.set
-        self.data_text['xscrollcommand'] = data_scroll_x.set
-        self.data_text['yscrollcommand'] = data_scroll_y.set
-
-        self.sort_and_display(sort_i)
-
-    def dual_scroll(self, *_):
-        """scrolls both text-boxes at once"""
-        self.data_headers.xview(*_)
-        self.data_text.xview(*_)
-
-    def sorter_select(self, *_):
-        sort_i = self.headers.index(self.sort_drop_choice.get())  # Get sorting index by text from dropdown
-        Main.sort_i = sort_i  # Returns class sort_i to "Main" so that sorting is kept when clicking menu buttons
-        self.sort_and_display(sort_i)
-
-    def sort_and_display(self, sort_i, *_):
-        """When selecting a header in the sorter dropdown menu, loading a file, or committing changes to a table"""
-
-        # Get sorting index, return it to Main class so that sorting is kept when switching between operations
-        if self.data:
-            # Sort and format rows of data
-            sorted_data = sorted(self.data, key=lambda x: x[sort_i])  # sort the data rows by the index
-            formatted_headers, formatted_data, self.form_width = self.sql.output_formatted(self.headers, sorted_data)
-
-            # Update texts for data headers and data table
-            for widget in [self.data_headers, self.data_text]:
-                widget.config(state="normal")
-                widget.delete('1.0', "end")
-            self.data_headers.insert('1.0', formatted_headers)
-            self.data_text.insert('1.0', formatted_data)
-
-            # Limit width/height of data_table and headers to enable scrolling
-            height = len(self.data) + 1
-            if screen.search_toggle:
-                if height > 15:
-                    height = 15
-            else:
-                if height > 20:
-                    height = 20
-            self.data_text.config(height=height)
-
-            # Change bg-color for every other row of data
-            last_line = self.data_text.index("end").split(".")[0]
-            tag = "odd"
-            for i in range(1, int(last_line)):
-                self.data_text.tag_add(tag, "%s.0" % i, "%s.0" % (i + 1))
-                tag = "even" if tag == "odd" else "odd"
-            self.data_text.tag_configure("odd", background="white")
-            for text_box in [self.data_headers, self.data_text]:
-                text_box.config(state="disabled")
-
-        self.pack(side="top", fill="both", expand=True, anchor="nw")  # Packs class object data frame
+from support_classes import AutoScrollbar, SharedStates, DataRow
+from dataframe import DataFrame
 
 
 class Main(tk.Tk):
@@ -139,7 +15,7 @@ class Main(tk.Tk):
     def __init__(self):
         super().__init__()
         self.geometry('900x600+250+100')
-        self.title('SQL Database (Johannes Överland)')
+        self.title('SQL Database Manager')
         self.config(bg="light gray")
         self.resizable(False, False)
 
@@ -162,16 +38,15 @@ class Main(tk.Tk):
         self.sql = sql_functions.SupportFunctions  # Import my SQL functions
         self.obj = button_functions  # Import my buttons and general button functions
         self.bf = button_functions.ButtonFunctions()  # Import button functions
+        self.shared_states = SharedStates()
 
         # Variables
         self.f_path = ""
         self.headers, self.data, self.form_width = ["placeholder"], [["placeholder"]], []
         self.tables_names = ["placeholder"]  # Used for generating table selection buttons
         self.table_i = 0  # Keeping track of which table is currently selected.
-        self.sort_i = 0
         self.current_row = []  # Container for list to send for writing to sql table
         self.entry_i = 0  # Index used for user input selections and/or iterations.
-        self.search_toggle = False  # For selecting search modes False or True, "single" or "all", respectively
         self.display_data = [self.tables_names[self.table_i], self.headers, self.data]
         self.data_frames = []  # Container for addressing data frames for  removal
 
@@ -309,8 +184,9 @@ class Main(tk.Tk):
 
     def table_select(self, *_):
         self.table_i = self.tables_names.index(self.tables_drop_var.get())  # Get table's index in tables_names list
-        self.sort_i = 0
+        self.shared_states.set_sort(0)  # Set sorting to default.
         self.headers, self.data = self.sql.open_table(self.f_path, self.tables_names[self.table_i])  # Fetch data
+        print(self.headers)
         self.read_click(_)
 
     def _operation_reset(self):
@@ -318,15 +194,13 @@ class Main(tk.Tk):
         for frame in self.data_frames:
             frame.destroy()
         # Search mode buttons
-        self.search_toggle = False
+        self.shared_states.search_all = False
         for button in [self.search_single, self.search_all]:
             button.pack_forget()
             button.config(**self.unselected)
-        self.data_frames.append(DataFrame(self.data_main, self.tables_names[self.table_i], self.headers, self.data,
-                                          self.sort_i))
+        self.data_frames.append(DataFrame(self.data_main, self.tables_names[self.table_i], self.headers, self.data, self.shared_states))
         # Menu button states
-        for button in [self.read_button, self.write_button, self.delete_button, self.edit_button,
-                       self.search_button]:
+        for button in [self.read_button, self.write_button, self.delete_button, self.edit_button, self.search_button]:
             button.config(**self.unselected)
 
         for widget in [self.edit_dropdown]:
@@ -528,9 +402,9 @@ class Main(tk.Tk):
         _.widget.config(**self.selected)
 
         if _.widget.cget("text") == 'Single table':
-            self.search_toggle = False
+            self.shared_states.search_all = False
         else:
-            self.search_toggle = True
+            self.shared_states.search_all = True
 
         self.bf.enable(self.execute_button)
         self.execute_button.bind("<Button-1>", self.search_execute)
@@ -539,7 +413,7 @@ class Main(tk.Tk):
         for frame in self.data_frames:
             frame.destroy()
 
-        if self.search_toggle is False:  # Searching selected table
+        if self.shared_states.search_all is False:  # Searching selected table
             self.data_frames.append(self.search_function(self.table_i))
         else:
             for i in range(len(self.tables_names)):  # Searching ALL tables
@@ -558,7 +432,7 @@ class Main(tk.Tk):
                     break  # Move on to next row, to not add the same row because if hit on multiple items
         self.preview_string.set(" \n ")
         # Finally, create a table with the search results.
-        return DataFrame(self.data_main, self.tables_names[i], headers, search_result, self.sort_i)
+        return DataFrame(self.data_main, self.tables_names[i], headers, search_result, self.shared_states)
 
     def _update_scrollregion(self, _):
         """Updates Data Main's scroll region after making multiple tables search"""

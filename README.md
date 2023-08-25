@@ -1,8 +1,12 @@
 # Database Viewer
-Runs with python 3.10
+Run with python versions 3 and up
 
-It handles management of table contents and can display search results
-from multiple tables
+## Description
+Graphical dql database ui that handles reading, writing, editing, deletion of data fields.
+Supports simultaneous display of search results from multiple tables at once.
 
-You can run sql_functions.py as a script to create two sample db-files.
+## Dummy data
+Run sql_functions.py as a script in order to create two example db-files in the local folder.
 
+## Screenshot
+![Search view](imgs/search_view.png)
